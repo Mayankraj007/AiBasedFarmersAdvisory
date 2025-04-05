@@ -1,0 +1,59 @@
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require("dotenv").config();
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+const generateAdvisory = async (cropType, cropName, activity, weather) => {
+    const prompt = `
+        Generate a **short and clear** agricultural advisory (2-3 lines per section) tailored to the crop type, considering local weather, soil conditions, and common farming practices.
+
+        📌 Inputs:
+        - Crop Type: ${cropType}
+        - Crop Name: ${cropName}
+        - Activity: ${activity}
+        - **Weather Forecast (Next 5 Days):**  
+        ${JSON.stringify(weather, null, 2)}
+
+        📢 Output Format:  
+        - 📅 Date-wise Weather Summary (Max 2 lines per day)
+        - ⚠️ Risks & Warnings (Highlight potential threats in max 2 lines for the given crop)
+        - 🌱 Decision (Proceed/Delay) & Why? (Max 2 lines)
+        - 🚜 Farmer Actions (Max 3 points, 1 line each)
+
+        🔹 Example Output:  
+        ---  
+        📢 Advisory for Wheat (Delay Sowing)  
+        
+        📅 Weather Forecast:  
+        - 🗓 28 Mar: 🌧 Heavy rain (50mm), 🌡 18°C → ⚠️ High waterlogging risk for wheat.  
+        - 🗓 29 Mar: ☁️ Cloudy, 🌡 20°C → ⚠️ Fungal risk due to high humidity.  
+        - 🗓 30 Mar:🌞 Sunny, 🌡 25°C → ✅ Good for drying fields.
+
+        #### ⚠️ Risks & Warnings:  
+        - Waterlogging risk from rain on 28 Mar. Wheat is highly vulnerable to standing water.  
+        - Humidity may encourage fungal growth, especially in early-stage crops.
+
+        **🌱 Delay Sowing:  
+        Wheat requires dry soil to avoid waterlogging. Wait until the soil is well-drained.**
+
+        🚜 Farmer Actions:  
+        ✅ Delay sowing for 3 days.  
+        ✅ Improve drainage around the field.  
+        ✅ Monitor fungal symptoms and apply fungicide if needed.
+
+        ----
+
+        Now, generate a **similar, concise advisory** for the given crop type and weather, ensuring the Risks & Warnings section is always included if applicable and tailored to the crop.
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+    } catch (err) {
+        console.error("Gemini API Error:", err);
+        return "Advisory generation failed.";
+    }
+};
+
+module.exports = { generateAdvisory };

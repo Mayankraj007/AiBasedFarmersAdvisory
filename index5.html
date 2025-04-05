@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Krishi Guide</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .tabs { display: flex; justify-content: space-around; background: #28a745; padding: 10px; border-radius: 5px; }
+        .tab { cursor: pointer; color: white; padding: 10px; }
+        .tab:hover { background: #218838; border-radius: 5px; }
+        .content { display: none; padding: 20px; }
+        .active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Smart Krishi Guide</h2>
+        <div class="tabs">
+            <div class="tab" onclick="showTab('cropChecker')">Crop & Soil Checker</div>
+            <div class="tab" onclick="showTab('waterUsage')">Water Optimization</div>
+            <div class="tab" onclick="showTab('seasonalPlanning')">Seasonal Planner</div>
+            <div class="tab" onclick="showTab('learning')">Learning Hub</div>
+        </div>
+        
+        <div id="cropChecker" class="content active">
+            <h3>Crop & Soil Health Checker</h3>
+            <label for="soilType">Select Soil Type:</label>
+            <select id="soilType">
+                <option value="sandy">Sandy Soil</option>
+                <option value="clay">Clay Soil</option>
+                <option value="loamy">Loamy Soil</option>
+            </select>
+            <button onclick="getCrops()">Check Crops</button>
+            <div id="cropResult"></div>
+        </div>
+
+        <div id="waterUsage" class="content">
+            <h3>Water Usage Optimization</h3>
+            <p>Coming Soon...</p>
+        </div>
+        
+        <div id="seasonalPlanning" class="content">
+            <h3>Seasonal Crop Planner</h3>
+            <p>Coming Soon...</p>
+        </div>
+        
+        <div id="learning" class="content">
+            <h3>Learning Hub</h3>
+            <p>Video & Infographic Guides</p>
+            <button onclick="alert('Play Video - Sustainable Farming')">Watch Video</button>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            let contents = document.querySelectorAll('.content');
+            contents.forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function getCrops() {
+            const soilType = document.getElementById('soilType').value;
+            const crops = {
+                sandy: ["Millets", "Groundnut", "Carrots"],
+                clay: ["Paddy", "Wheat", "Soybean"],
+                loamy: ["Maize", "Tomato", "Potato"]
+            };
+            document.getElementById('cropResult').innerHTML = `<p>Best Crops: ${crops[soilType].join(', ')}</p>`;
+        }
+    </script>
+</body>
+</html>

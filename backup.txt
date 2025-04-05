@@ -1,0 +1,87 @@
+// geminiService.js
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require("dotenv").config();
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+const generateAdvisory = async (cropType, activity, weather) => {
+    const prompt = `
+        Based on the following conditions:
+        Crop Type: ${cropType}
+        Activity: ${activity}
+        Weather Forecast for the next 5 days:
+        ${JSON.stringify(weather, null, 2)}
+        
+        Provide a detailed agricultural advisory considering best practices, risk factors, and optimal actions for farmers in 4,5 bullet points.
+    `;
+    
+    try {
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+    } catch (err) {
+        console.error("Gemini API Error:", err);
+        return "Advisory generation failed.";
+    }
+};
+
+module.exports = { generateAdvisory };
+
+
+
+
+//
+
+
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require("dotenv").config();
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+const generateAdvisory = async (cropType, activity, weather) => {
+    const prompt = `
+        Generate a **structured and easy-to-read** agricultural advisory for farmers based on the following:
+        
+        **📌 Inputs:**
+        - **Crop Type:** ${cropType}
+        - **Activity:** ${activity}
+        - **Weather Forecast (Next 5 Days):**  
+        ${JSON.stringify(weather, null, 2)}
+
+        **📢 Output Format:**  
+        - Use **clear headings, icons, and bullet points** for readability.
+        - Start with a **brief recommendation (Delay or Proceed)** based on weather conditions.
+        - Follow with **"🌱 Why Delay?" or "✅ Why Proceed?"** section explaining key reasons.
+        - Provide **"🚜 What Farmers Should Do"** with **3-5 practical actions**.
+        - Keep the language **simple, short, and farmer-friendly**.
+
+        **🔹 Example Output:**
+        
+        ---
+        ### **📢 Advisory: Delay Sowing**
+        ❄ **Cold Temperatures:** Below freezing on the 27th.  
+        🌧 **Heavy Rainfall:** Expected on the 28th and 29th.  
+        🛑 **Risk of Seed Rot & Fungal Diseases:** Wet conditions increase disease risks.  
+        
+        #### **🚜 What Farmers Should Do:**
+        ✅ **Wait for better conditions** before sowing.  
+        ✅ **Prepare soil in advance** if possible (before rain).  
+        ✅ **Improve drainage** to prevent waterlogging.  
+        ✅ **Monitor weather** for an improved sowing window.  
+        ---
+
+        Now, generate a **similar advisory based on the given inputs.**
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+    } catch (err) {
+        console.error("Gemini API Error:", err);
+        return "Advisory generation failed.";
+    }
+};
+
+module.exports = { generateAdvisory };

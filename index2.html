@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Advisory System</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
+        input, button { width: 90%; padding: 10px; margin: 5px; }
+        .result { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>AI-Powered Crop Advisory</h2>
+        <input type="text" id="crop" placeholder="Enter Crop Type" required>
+        <input type="text" id="soil" placeholder="Enter Soil Type" required>
+        <input type="text" id="location" placeholder="Enter Location" required>
+        <button onclick="getAdvisory()">Get Advisory</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        async function getAdvisory() {
+            const crop = document.getElementById('crop').value;
+            const soil = document.getElementById('soil').value;
+            const location = document.getElementById('location').value;
+            const apiKey = 'YOUR_API_KEY'; // Replace with OpenWeatherMap API key
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${location}&cnt=6&units=metric&appid=${apiKey}`;
+            
+            try {
+                const response = await fetch(weatherUrl);
+                const data = await response.json();
+                let shouldGrow = true;
+                let advisoryHtml = `<h3>Crop Advisory for ${crop}</h3>`;
+                advisoryHtml += `<p>Location: ${location}</p>`;
+                
+                for (let i = 0; i < data.list.length; i++) {
+                    let day = data.list[i];
+                    if (day.main.temp > 40 || day.main.temp < 10) {
+                        shouldGrow = false;
+                    }
+                    advisoryHtml += `<p>Day ${i + 1}: ${day.dt_txt} - Temp: ${day.main.temp}°C</p>`;
+                }
+                
+                advisoryHtml += `<h4>Recommendation: ${shouldGrow ? "Yes, suitable conditions" : "No, extreme weather"}</h4>`;
+                document.getElementById('result').innerHTML = advisoryHtml;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p style='color:red;'>Error fetching weather data. Check location or API key.</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

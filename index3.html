@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Advisory System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px gray;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .advisory-card {
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .alert { background-color: #ffc107; color: #333; }
+        .danger { background-color: #dc3545; color: white; }
+        .success { background-color: #28a745; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🌾 Crop Advisory System</h2>
+        <input type="text" id="location" placeholder="📍 Enter Location">
+        
+        <select id="cropType">
+            <option value="">🌱 Select Crop Type</option>
+            <option value="Vegetable">Vegetable</option>
+            <option value="Cereal">Cereal</option>
+            <option value="Fruit">Fruit</option>
+        </select>
+
+        <select id="activity">
+            <option value="">🚜 Select Activity</option>
+            <option value="Sowing">Sowing</option>
+            <option value="Harvesting">Harvesting</option>
+            <option value="Growth">Growth</option>
+        </select>
+
+        <button onclick="fetchAdvisory()">🔍 Get Advisory</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000/api/advisory"; // Change this for deployment
+
+        async function fetchAdvisory() {
+            const location = document.getElementById('location').value.trim();
+            const cropType = document.getElementById('cropType').value;
+            const activity = document.getElementById('activity').value;
+
+            if (!location || !cropType || !activity) {
+                document.getElementById("result").innerHTML = "<p style='color:red;'>⚠️ Please fill all fields!</p>";
+                return;
+            }
+
+            document.getElementById("result").innerHTML = "<p>⏳ Loading advisory...</p>";
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ cropType, activity, location })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Server responded with an error.");
+                }
+
+                const data = await response.json();
+                displayAdvisory(data.advisory);
+            } catch (error) {
+                document.getElementById("result").innerHTML = `<p>❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        function displayAdvisory(advisoryText) {
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+
+            const parts = advisoryText.split("\n");
+            let riskText = "", actionText = "", generalText = "";
+
+            parts.forEach(line => {
+                if (line.includes("⚠️") || line.includes("Risk")) riskText += `<p>${line}</p>`;
+                else if (line.includes("✅") || line.includes("Action")) actionText += `<p>${line}</p>`;
+                else generalText += `<p>${line}</p>`;
+            });
+
+            resultDiv.innerHTML = `
+                <div class="advisory-card alert">
+                    <h3>📢 Advisory</h3>
+                    ${generalText}
+                </div>
+                <div class="advisory-card danger">
+                    <h3>⚠️ Risks & Warnings</h3>
+                    ${riskText || "<p>No major risks reported.</p>"}
+                </div>
+                <div class="advisory-card success">
+                    <h3>🚜 What Farmers Should Do</h3>
+                    ${actionText || "<p>Follow standard best practices.</p>"}
+                </div>
+            `;
+        }
+    </script>
+
+</body>
+</html>

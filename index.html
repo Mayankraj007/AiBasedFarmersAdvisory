@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: #007BFF;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+        .bot-message {
+            background: #e8e8e8;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+        .input-container {
+            display: flex;
+            padding: 10px;
+            background: #fff;
+            border-top: 1px solid #ddd;
+        }
+        .input-box {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+        }
+        .send-btn {
+            margin-left: 10px;
+            padding: 10px 15px;
+            font-size: 16px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .send-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-box" id="chatBox"></div>
+        <div class="input-container">
+            <input type="text" id="promptInput" class="input-box" placeholder="Type your message...">
+            <button onclick="sendPrompt()" class="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendPrompt() {
+            const inputBox = document.getElementById("promptInput");
+            const chatBox = document.getElementById("chatBox");
+            const prompt = inputBox.value.trim();
+
+            if (!prompt) return;
+
+            // Append user message
+            appendMessage("user-message", prompt);
+            inputBox.value = ""; // Clear input box
+
+            // Append bot typing animation
+            const typingMessage = appendMessage("bot-message", "⏳ Typing...");
+            
+            try {
+                const response = await fetch("http://localhost:3000/api/content", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question: prompt })
+                });
+
+                const data = await response.json();
+                chatBox.removeChild(typingMessage); // Remove typing message
+                appendMessage("bot-message", data.result || "⚠️ No response received.");
+            } catch (error) {
+                chatBox.removeChild(typingMessage);
+                appendMessage("bot-message", "❌ Error: " + error.message);
+            }
+        }
+
+        function appendMessage(className, text) {
+            const chatBox = document.getElementById("chatBox");
+            const message = document.createElement("div");
+            message.classList.add("message", className);
+            message.textContent = text;
+            chatBox.appendChild(message);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to latest message
+            return message;
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+const express = require('express');
+const cors = require('cors'); // Import CORS
+const bodyParser = require('body-parser');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const app = express();
+
+// ✅ Allow requests from frontend (127.0.0.1:3001)
+app.use(cors({ origin: "http://127.0.0.1:3000" }));
+
+app.use(express.json());
+app.use(bodyParser.json());
+
+const genAI = new GoogleGenerativeAI("AIzaSyCS5BVJbK3gC26K5uyF1v9vD9MYzi1hvv4");
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+const generate = async (prompt) => {
+    try {
+        const result = await model.generateContent(prompt);
+        console.log(result.response.text());
+        return result.response.text();
+    } catch (err) {
+        console.error(err);
+    }
+};
+
+app.post('/api/content', async (req, res) => {
+    try {
+        const data = req.body.question;
+        if (!data) {
+            return res.status(400).json({ error: "No question provided" });
+        }
+
+        const result = await generate(data);
+        res.json({ result });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.listen(3000, () => console.log('Server is running on port 3000'));
